@@ -73,11 +73,6 @@ const Navbar: React.FC = () => {
               Features
             </Link>
           </li>
-          <li>
-            <Link href="/about" className={navLinkClass(isActive("/about"))}>
-              About
-            </Link>
-          </li>
           {isAuthenticated && (
             <>
               <li>
@@ -92,16 +87,19 @@ const Navbar: React.FC = () => {
               </li>
             </>
           )}
+          <li>
+            <Link href="/about" className={navLinkClass(isActive("/about"))}>
+              About
+            </Link>
+          </li>
+          <li>
+            <Link href="/contact" className={navLinkClass(isActive("/contact"))}>
+              Contact
+            </Link>
+          </li>
         </ul>
 
         <div className="flex items-center gap-2 md:gap-3">
-          <button
-            onClick={toggleTheme}
-            className={`flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 transition-colors ${themeButtonClass}`}
-          >
-            {isDarkMode ? <MdDarkMode className="text-xl" /> : <MdLightMode className="text-xl" />}
-          </button>
-
           {isAuthenticated && user ? (
             <Dropdown>
               <DropdownTrigger>
@@ -206,6 +204,11 @@ const Navbar: React.FC = () => {
               <li>
                 <Link href="/about" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
                   About
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                  Contact
                 </Link>
               </li>
               {isAuthenticated && (

@@ -5,6 +5,7 @@ const navLinks = [
   { label: "Home", href: "/" },
   { label: "Features", href: "/features" },
   { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
   { label: "Create a post", href: "/generate" },
 ];
 
