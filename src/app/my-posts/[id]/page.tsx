@@ -98,13 +98,11 @@ export default function PostDetailsPage() {
   const ownsPost = Boolean(
     user && (user.id === post?.userId || user._id === post?.userId),
   );
-  const heroImage = useMemo(() => {
-    if (!post?.imageUrl) return null;
-    return post.imageUrl.startsWith("http://") ||
-      post.imageUrl.startsWith("https://")
-      ? post.imageUrl
-      : null;
-  }, [post?.imageUrl]);
+  const heroImage = post?.imageUrl &&
+    (post.imageUrl.startsWith("http://") ||
+      post.imageUrl.startsWith("https://"))
+    ? post.imageUrl
+    : null;
 
   if (loading) {
     return (
