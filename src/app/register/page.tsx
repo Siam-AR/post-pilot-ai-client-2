@@ -56,7 +56,7 @@ function RegisterPageContent() {
   return (
     <Card className="theme-section mx-auto mt-5 max-w-2xl px-4 py-8 md:px-8 md:py-10">
       <div>
-        <h1 className="mb-2 text-center text-2xl font-bold md:text-3xl">Join Community Spark</h1>
+        <h1 className="mb-2 text-center text-2xl font-bold md:text-3xl">Join Post Pilot AI</h1>
         <p className="mb-6 text-center text-slate-600">Create an account to share your community projects</p>
 
         {error && (

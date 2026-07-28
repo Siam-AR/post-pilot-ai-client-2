@@ -1,27 +1,44 @@
 "use client";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { postsAPI, SavedPost } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@/lib/auth-context";
+import { buildLoginRedirectUrl } from "@/lib/auth-redirect";
 
 const formatDate = (value?: string) => {
   if (!value) return "Not available";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  return Number.isNaN(date.getTime())
+    ? "Not available"
+    : date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
 };
 
 export default function PostDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user } = useAuth();
+  const pathname = usePathname();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [post, setPost] = useState<SavedPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace(buildLoginRedirectUrl(pathname));
+      return;
+    }
+
+    if (authLoading) {
+      return;
+    }
+
     let isMounted = true;
 
     postsAPI
@@ -39,7 +56,7 @@ export default function PostDetailsPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, authLoading, isAuthenticated, pathname, router]);
 
   const deletePost = async () => {
     if (!post) return;
@@ -49,14 +66,22 @@ export default function PostDetailsPage() {
       showToast("Post deleted successfully.", "success");
       router.push("/my-posts");
     } catch (error) {
-      showToast(error instanceof Error ? error.message : "Unable to delete post.", "error");
+      showToast(
+        error instanceof Error ? error.message : "Unable to delete post.",
+        "error",
+      );
     }
   };
 
-  const ownsPost = Boolean(user && (user.id === post?.userId || user._id === post?.userId));
+  const ownsPost = Boolean(
+    user && (user.id === post?.userId || user._id === post?.userId),
+  );
   const heroImage = useMemo(() => {
     if (!post?.imageUrl) return null;
-    return post.imageUrl.startsWith("http://") || post.imageUrl.startsWith("https://") ? post.imageUrl : null;
+    return post.imageUrl.startsWith("http://") ||
+      post.imageUrl.startsWith("https://")
+      ? post.imageUrl
+      : null;
   }, [post?.imageUrl]);
 
   if (loading) {
@@ -72,7 +97,10 @@ export default function PostDetailsPage() {
       <main className="grid min-h-screen place-items-center bg-[#08111c] px-5 text-center text-white">
         <div>
           <h1 className="text-4xl font-black">Post not found</h1>
-          <Link href="/features" className="mt-6 inline-block rounded-xl bg-[#5067f5] px-5 py-3 font-bold">
+          <Link
+            href="/features"
+            className="mt-6 inline-block rounded-xl bg-[#5067f5] px-5 py-3 font-bold"
+          >
             Back to Explore
           </Link>
         </div>
@@ -91,25 +119,39 @@ export default function PostDetailsPage() {
           <article className="rounded-3xl border border-white/10 bg-white/3 p-6 sm:p-10">
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1423]">
               {heroImage ? (
-                <img src={heroImage} alt={post.title} className="h-64 w-full object-cover" />
+                <img
+                  src={heroImage}
+                  alt={post.title}
+                  className="h-64 w-full object-cover"
+                />
               ) : (
                 <div className="flex h-64 items-center justify-center bg-[radial-gradient(circle_at_30%_20%,#7184ff,transparent_35%),linear-gradient(135deg,#111b35,#0b1423)]">
-                  <span className="text-sm uppercase tracking-[0.25em] text-slate-400">No image provided</span>
+                  <span className="text-sm uppercase tracking-[0.25em] text-slate-400">
+                    No image provided
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="mt-8 flex flex-wrap gap-2 text-sm">
-              <span className="rounded-full bg-[#5067f5]/20 px-3 py-1 text-[#b5bdff]">{post.platform}</span>
-              <span className="rounded-full bg-white/10 px-3 py-1">{post.tone}</span>
-              <span className="rounded-full bg-white/10 px-3 py-1">{post.length}</span>
+              <span className="rounded-full bg-[#5067f5]/20 px-3 py-1 text-[#b5bdff]">
+                {post.platform}
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                {post.tone}
+              </span>
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                {post.length}
+              </span>
             </div>
 
             <h1 className="mt-5 text-4xl font-black italic">{post.title}</h1>
 
             <section className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-5">
               <h2 className="text-xl font-bold">Overview</h2>
-              <p className="mt-3 font-serif text-lg text-slate-400">{post.shortDescription}</p>
+              <p className="mt-3 font-serif text-lg text-slate-400">
+                {post.shortDescription}
+              </p>
             </section>
 
             <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -129,7 +171,9 @@ export default function PostDetailsPage() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-[#0b1423]/70 p-4">
                   <p className="text-sm text-slate-500">Created</p>
-                  <p className="mt-1 font-semibold">{formatDate(post.createdAt)}</p>
+                  <p className="mt-1 font-semibold">
+                    {formatDate(post.createdAt)}
+                  </p>
                 </div>
               </div>
             </section>
@@ -138,12 +182,22 @@ export default function PostDetailsPage() {
               <h2 className="text-xl font-bold">Related content</h2>
               <div className="mt-4 space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-[#0b1423]/70 p-4">
-                  <h3 className="font-semibold text-white">Generated content</h3>
-                  <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-slate-200">{post.generatedContent}</p>
+                  <h3 className="font-semibold text-white">
+                    Generated content
+                  </h3>
+                  <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-slate-200">
+                    {post.generatedContent}
+                  </p>
                 </div>
                 <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-4 text-sm text-slate-400">
-                  <p>Need a fresh version? Create another post in the generator and it will stay connected to your library.</p>
-                  <Link href="/generate" className="mt-3 inline-flex rounded-xl bg-[#5067f5] px-4 py-2 font-semibold text-white">
+                  <p>
+                    Need a fresh version? Create another post in the generator
+                    and it will stay connected to your library.
+                  </p>
+                  <Link
+                    href="/generate-post"
+                    className="mt-3 inline-flex rounded-xl bg-[#5067f5] px-4 py-2 font-semibold text-white"
+                  >
                     Create another post
                   </Link>
                 </div>
@@ -153,13 +207,21 @@ export default function PostDetailsPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <button
                 type="button"
-                onClick={() => navigator.clipboard.writeText(post.generatedContent).then(() => showToast("Post copied.", "success"))}
+                onClick={() =>
+                  navigator.clipboard
+                    .writeText(post.generatedContent)
+                    .then(() => showToast("Post copied.", "success"))
+                }
                 className="rounded-xl bg-[#5067f5] px-5 py-3 font-bold"
               >
                 Copy Post
               </button>
               {ownsPost ? (
-                <button type="button" onClick={deletePost} className="rounded-xl border border-red-400/30 px-5 py-3 font-bold text-red-300">
+                <button
+                  type="button"
+                  onClick={deletePost}
+                  className="rounded-xl border border-red-400/30 px-5 py-3 font-bold text-red-300"
+                >
                   Delete
                 </button>
               ) : null}

@@ -55,9 +55,16 @@ const Navbar: React.FC = () => {
   return (
     <div className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#090e15]/95 py-2 shadow-[0_10px_30px_rgba(0,0,0,.2)] backdrop-blur-xl md:py-3">
       <nav className="mx-auto flex h-14 max-w-[118rem] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex min-w-0 items-center gap-2.5 text-lg font-bold tracking-tight text-white sm:text-2xl">
+        <Link
+          href="/"
+          className="flex min-w-0 items-center gap-2.5 text-lg font-bold tracking-tight text-white sm:text-2xl"
+        >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl">
-            <img src="/post-pilot-ai-logo.png" alt="Post Pilot AI logo" className="h-full w-full object-contain" />
+            <img
+              src="/post-pilot-ai-logo.png"
+              alt="Post Pilot AI logo"
+              className="h-full w-full object-contain"
+            />
           </div>
           <span className="truncate">Post Pilot AI</span>
         </Link>
@@ -69,19 +76,28 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="/features" className={navLinkClass(isActive("/features"))}>
+            <Link
+              href="/features"
+              className={navLinkClass(isActive("/features"))}
+            >
               Features
             </Link>
           </li>
           {isAuthenticated && (
             <>
               <li>
-                <Link href="/generate" className={navLinkClass(isActive("/generate"))}>
-                  Generate
+                <Link
+                  href="/generate-post"
+                  className={navLinkClass(isActive("/generate-post"))}
+                >
+                  Generate Post
                 </Link>
               </li>
               <li>
-                <Link href="/my-posts" className={navLinkClass(isActive("/my-posts"))}>
+                <Link
+                  href="/my-posts"
+                  className={navLinkClass(isActive("/my-posts"))}
+                >
                   My Posts
                 </Link>
               </li>
@@ -93,7 +109,10 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="/contact" className={navLinkClass(isActive("/contact"))}>
+            <Link
+              href="/contact"
+              className={navLinkClass(isActive("/contact"))}
+            >
               Contact
             </Link>
           </li>
@@ -105,35 +124,60 @@ const Navbar: React.FC = () => {
               <DropdownTrigger>
                 <div className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-2 py-2 shadow-sm md:px-3">
                   <Avatar className="transition-transform" size="sm">
-                    <Avatar.Image referrerPolicy="no-referrer" alt={user?.name || "User"} src={user?.image} />
-                    <Avatar.Fallback>{user?.name?.charAt(0)?.toUpperCase()}</Avatar.Fallback>
+                    <Avatar.Image
+                      referrerPolicy="no-referrer"
+                      alt={user?.name || "User"}
+                      src={user?.image}
+                    />
+                    <Avatar.Fallback>
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </Avatar.Fallback>
                   </Avatar>
-                  <span className="hidden text-sm font-medium text-white sm:inline">{user?.name}</span>
+                  <span className="hidden text-sm font-medium text-white sm:inline">
+                    {user?.name}
+                  </span>
                 </div>
               </DropdownTrigger>
               <Dropdown.Popover>
                 <div className="px-3 pb-1 pt-3">
                   <div className="flex items-center gap-2">
                     <Avatar size="sm">
-                      <Avatar.Image referrerPolicy="no-referrer" alt={user?.name || "User"} src={user?.image} />
+                      <Avatar.Image
+                        referrerPolicy="no-referrer"
+                        alt={user?.name || "User"}
+                        src={user?.image}
+                      />
                       <Avatar.Fallback delayMs={600}>
                         {user?.name?.charAt(0)?.toUpperCase() || "U"}
                       </Avatar.Fallback>
                     </Avatar>
                     <div className="flex flex-col gap-0">
-                      <p className="text-sm font-medium leading-5">{user?.name}</p>
-                      <p className="text-xs leading-none text-slate-500">{(user as User | null)?.email}</p>
+                      <p className="text-sm font-medium leading-5">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs leading-none text-slate-500">
+                        {(user as User | null)?.email}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <Dropdown.Menu aria-label="User Actions">
-                  <DropdownItem key="profile" textValue="Profile" href="/profile">
+                  <DropdownItem
+                    key="profile"
+                    textValue="Profile"
+                    href="/profile"
+                  >
                     <div className="flex w-full items-center justify-between gap-2">
                       <Label>Profile</Label>
                       <MdPerson className="size-3.5 text-slate-500" />
                     </div>
                   </DropdownItem>
-                  <DropdownItem key="logout" textValue="Logout" variant="danger" onClick={handleSignOut}>
+                  <DropdownItem
+                    key="logout"
+                    textValue="Logout"
+                    variant="danger"
+                    onClick={handleSignOut}
+                  >
                     <div className="flex w-full items-center justify-between gap-2">
                       <Label>Logout</Label>
                       <MdLogout className="size-3.5 text-danger" />
@@ -145,12 +189,19 @@ const Navbar: React.FC = () => {
           ) : (
             <div className="hidden items-center gap-2 sm:flex">
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="rounded-xl font-serif text-base text-slate-200 hover:bg-white/5 hover:text-white">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl font-serif text-base text-slate-200 hover:bg-white/5 hover:text-white"
+                >
                   Login
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="rounded-xl bg-[linear-gradient(100deg,#5067f5,#a144ef)] px-5 py-2.5 font-serif text-base font-bold text-white shadow-[0_8px_22px_rgba(100,83,241,.26)] transition-transform hover:scale-[1.02]">
+                <Button
+                  size="sm"
+                  className="rounded-xl bg-[linear-gradient(100deg,#5067f5,#a144ef)] px-5 py-2.5 font-serif text-base font-bold text-white shadow-[0_8px_22px_rgba(100,83,241,.26)] transition-transform hover:scale-[1.02]"
+                >
                   Get Started Free
                 </Button>
               </Link>
@@ -164,21 +215,34 @@ const Navbar: React.FC = () => {
             aria-label="Toggle navigation menu"
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <span className="text-xl">✕</span> : <span className="text-xl">☰</span>}
+            {mobileMenuOpen ? (
+              <span className="text-xl">✕</span>
+            ) : (
+              <span className="text-xl">☰</span>
+            )}
           </button>
         </div>
       </nav>
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-[9999] md:hidden">
-          <div className="absolute inset-0 bg-slate-950/70" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="absolute inset-0 bg-slate-950/70"
+            onClick={() => setMobileMenuOpen(false)}
+          />
           <div className="absolute right-0 top-0 flex h-screen w-[84%] max-w-[320px] flex-col border-l border-white/10 bg-slate-950 p-4 shadow-[0_20px_80px_rgba(2,6,23,0.7)]">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/10 p-1">
-                  <img src="/logo.svg" alt="Post Pilot AI logo" className="h-7 w-7 rounded-lg object-cover" />
+                  <img
+                    src="/logo.svg"
+                    alt="Post Pilot AI logo"
+                    className="h-7 w-7 rounded-lg object-cover"
+                  />
                 </div>
-                <span className="text-sm font-semibold text-white">Post Pilot AI</span>
+                <span className="text-sm font-semibold text-white">
+                  Post Pilot AI
+                </span>
               </div>
               <button
                 type="button"
@@ -192,34 +256,58 @@ const Navbar: React.FC = () => {
 
             <ul className="mt-4 flex flex-col gap-2 text-sm">
               <li>
-                <Link href="/" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/"
+                  className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/features" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/features"
+                  className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/about"
+                  className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   About
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/contact"
+                  className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   Contact
                 </Link>
               </li>
               {isAuthenticated && (
                 <>
                   <li>
-                    <Link href="/generate" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
-                      Generate
+                    <Link
+                      href="/generate-post"
+                      className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Generate Post
                     </Link>
                   </li>
                   <li>
-                    <Link href="/my-posts" className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                    <Link
+                      href="/my-posts"
+                      className="flex rounded-xl px-3 py-3 text-blue-100 hover:bg-white/10 hover:text-white"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       My Posts
                     </Link>
                   </li>
@@ -230,19 +318,35 @@ const Navbar: React.FC = () => {
             <div className="mt-4 border-t border-white/10 pt-4">
               {isAuthenticated ? (
                 <div className="flex flex-col gap-2">
-                  <Link href="/generate" className="rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white" onClick={() => setMobileMenuOpen(false)}>
-                    Generate
+                  <Link
+                    href="/generate-post"
+                    className="rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Generate Post
                   </Link>
-                  <Link href="/my-posts" className="rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/my-posts"
+                    className="rounded-xl bg-white/10 px-3 py-3 text-center text-sm font-semibold text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     My Posts
                   </Link>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <Link href="/login" className="rounded-xl border border-white/15 px-3 py-3 text-center text-sm font-semibold text-white" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/login"
+                    className="rounded-xl border border-white/15 px-3 py-3 text-center text-sm font-semibold text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Login
                   </Link>
-                  <Link href="/register" className="rounded-xl bg-blue-600 px-3 py-3 text-center text-sm font-semibold text-white" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/register"
+                    className="rounded-xl bg-blue-600 px-3 py-3 text-center text-sm font-semibold text-white"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     Register
                   </Link>
                 </div>
