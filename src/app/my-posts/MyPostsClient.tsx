@@ -353,22 +353,8 @@ export default function MyPostsClient() {
               {items.map((post) => (
                 <article
                   key={post._id}
-                  className="relative rounded-3xl border border-white/10 bg-white/3 p-6 transition-transform hover:-translate-y-1"
+                  className="rounded-3xl border border-white/10 bg-white/3 p-6 transition-transform hover:-translate-y-1"
                 >
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setPendingDelete({ id: post._id, title: post.title });
-                      setShowDeleteModal(true);
-                    }}
-                    disabled={deletingId === post._id}
-                    className="absolute right-4 top-4 rounded-full bg-red-600/20 px-3 py-1 text-sm text-red-300 hover:bg-red-600/30 disabled:opacity-60"
-                    aria-label="Delete post"
-                  >
-                    {deletingId === post._id ? "Deleting..." : "Delete"}
-                  </button>
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1423]">
                     {post.imageUrl &&
                     (post.imageUrl.startsWith("http://") ||
@@ -413,12 +399,25 @@ export default function MyPostsClient() {
                   </p>
                   <div className="mt-5 flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                     <span>{new Date(post.createdAt).toLocaleDateString()}</span>
-                    <Link
-                      href={`/my-posts/${post._id}`}
-                      className="font-semibold text-[#9ba8ff]"
-                    >
-                      Open post →
-                    </Link>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPendingDelete({ id: post._id, title: post.title });
+                          setShowDeleteModal(true);
+                        }}
+                        disabled={deletingId === post._id}
+                        className="inline-flex rounded-xl border border-red-500/30 bg-red-600/10 px-4 py-3 font-semibold text-red-300 transition hover:bg-red-600/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {deletingId === post._id ? "Deleting..." : "Delete"}
+                      </button>
+                      <Link
+                        href={`/my-posts/${post._id}`}
+                        className="inline-flex rounded-xl bg-[#5067f5] px-4 py-3 font-semibold text-white transition hover:bg-[#4056d1]"
+                      >
+                        Open post
+                      </Link>
+                    </div>
                   </div>
                 </article>
               ))}

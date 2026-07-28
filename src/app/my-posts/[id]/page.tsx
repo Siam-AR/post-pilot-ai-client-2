@@ -26,6 +26,7 @@ export default function PostDetailsPage() {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { showToast } = useToast();
   const [post, setPost] = useState<SavedPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<SavedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -57,6 +58,27 @@ export default function PostDetailsPage() {
       isMounted = false;
     };
   }, [id, authLoading, isAuthenticated, pathname, router]);
+
+  useEffect(() => {
+    if (!post) return;
+
+    let isMounted = true;
+    postsAPI
+      .getMine({ platform: post.platform, tone: post.tone, pageSize: 4 })
+      .then((response) => {
+        if (!isMounted) return;
+        setRelatedPosts(
+          response.items.filter((item) => item._id !== post._id).slice(0, 3),
+        );
+      })
+      .catch(() => {
+        if (isMounted) setRelatedPosts([]);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [post]);
 
   const deletePost = async () => {
     if (!post) return;
@@ -179,13 +201,10 @@ export default function PostDetailsPage() {
             </section>
 
             <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
-              <h2 className="text-xl font-bold">Related content</h2>
+              <h2 className="text-xl font-bold">Generated content</h2>
               <div className="mt-4 space-y-4">
                 <div className="rounded-2xl border border-white/10 bg-[#0b1423]/70 p-4">
-                  <h3 className="font-semibold text-white">
-                    Generated content
-                  </h3>
-                  <p className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed text-slate-200">
+                  <p className="whitespace-pre-wrap font-serif text-lg leading-relaxed text-slate-200">
                     {post.generatedContent}
                   </p>
                 </div>
@@ -201,6 +220,32 @@ export default function PostDetailsPage() {
                     Create another post
                   </Link>
                 </div>
+              </div>
+            </section>
+
+            <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <h2 className="text-xl font-bold">Related content</h2>
+              <div className="mt-4 space-y-4">
+                {relatedPosts.length > 0 ? (
+                  relatedPosts.map((related) => (
+                    <Link
+                      key={related._id}
+                      href={`/my-posts/${related._id}`}
+                      className="block rounded-2xl border border-white/10 bg-[#0b1423]/70 p-4 transition hover:border-[#5067f5]/50"
+                    >
+                      <p className="font-semibold text-white">
+                        {related.title}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-400">
+                        {related.platform} · {related.tone} · {related.length}
+                      </p>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 p-4 text-sm text-slate-400">
+                    No other posts found with the same platform and tone.
+                  </div>
+                )}
               </div>
             </section>
 
