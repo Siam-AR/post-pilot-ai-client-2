@@ -101,7 +101,7 @@ export const normalizeUser = (user: Record<string, any>) => ({
   _id: user._id ?? user.id,
 });
 
-const normalizeSavedPost = (post: Record<string, any>) => ({
+const normalizeSavedPost = (post: SavedPost): SavedPost => ({
   ...post,
   id: post.id ?? post._id ?? "",
   _id: post._id ?? post.id,
