@@ -4,26 +4,35 @@ export interface ApiCallOptions extends RequestInit {
   headers?: Record<string, string>;
 }
 
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: string;
+}
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+
+const buildHeaders = (options: ApiCallOptions = {}) => {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  return {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
 export const apiCall = async <T = unknown>(
   endpoint: string,
   options: ApiCallOptions = {},
 ): Promise<T> => {
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
   const url = `${API_BASE_URL.replace(/\/$/, "")}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
   const response = await fetch(url, {
     ...options,
-    headers,
+    headers: buildHeaders(options),
   });
 
   const result = await response.json();
@@ -37,29 +46,50 @@ export const apiCall = async <T = unknown>(
   return result.data as T;
 };
 
+export const apiCallFull = async <T = unknown>(
+  endpoint: string,
+  options: ApiCallOptions = {},
+): Promise<ApiResponse<T>> => {
+  const url = `${API_BASE_URL.replace(/\/$/, "")}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const response = await fetch(url, {
+    ...options,
+    headers: buildHeaders(options),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    throw new Error(
+      result.message || `Request failed with status ${response.status}`,
+    );
+  }
+
+  return result as ApiResponse<T>;
+};
+
 export const authAPI = {
   register: (data: Record<string, unknown>) =>
-    apiCall<AuthResponse>("/auth/register", {
+    apiCallFull<AuthResponse>("/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
   login: (data: Record<string, unknown>) =>
-    apiCall<AuthResponse>("/auth/login", {
+    apiCallFull<AuthResponse>("/auth/login", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
   googleLogin: (data: Record<string, unknown>) =>
-    apiCall<AuthResponse>("/auth/google", {
+    apiCallFull<AuthResponse>("/auth/google", {
       method: "POST",
       body: JSON.stringify(data),
     }),
 
-  getUser: () => apiCall<{ user: User }>("/auth/user"),
+  getUser: () => apiCall<User>("/auth/me"),
 
   updateUser: (data: Partial<User>) =>
-    apiCall<{ user: User }>("/auth/user", {
+    apiCall<User>("/auth/me", {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
