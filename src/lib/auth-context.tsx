@@ -26,26 +26,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const savedToken = localStorage.getItem("token");
-      if (savedToken) {
-        try {
-          setToken(savedToken);
-          const response = await authAPI.getUser();
-          setUser(normalizeUserResponse(response));
-        } catch {
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
-        }
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, []);
-
   const normalizeAuthResponse = (
     response: AuthResponse | { data?: AuthResponse },
   ): AuthResponse => {
@@ -76,6 +56,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
     return normalizeUser(userData);
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const savedToken = localStorage.getItem("token");
+      if (savedToken) {
+        try {
+          setToken(savedToken);
+          const response = await authAPI.getUser();
+          setUser(normalizeUserResponse(response));
+        } catch {
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
+        }
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, []);
 
   const register = async (
     data: Record<string, unknown>,
