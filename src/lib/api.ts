@@ -86,14 +86,26 @@ export const authAPI = {
       body: JSON.stringify(data),
     }),
 
-  getUser: () => apiCall<User>("/auth/me"),
+  getUser: () => apiCall<User>("/auth/me").then(normalizeUser),
 
   updateUser: (data: Partial<User>) =>
     apiCall<User>("/auth/me", {
       method: "PATCH",
       body: JSON.stringify(data),
-    }),
+    }).then(normalizeUser),
 };
+
+export const normalizeUser = (user: Record<string, any>) => ({
+  ...user,
+  id: user.id ?? user._id ?? "",
+  _id: user._id ?? user.id,
+});
+
+const normalizeSavedPost = (post: Record<string, any>) => ({
+  ...post,
+  id: post.id ?? post._id ?? "",
+  _id: post._id ?? post.id,
+});
 
 export type GeneratePostInput = {
   topic: string;
@@ -110,7 +122,8 @@ export const aiAPI = {
 };
 
 export interface SavedPost {
-  _id: string;
+  id: string;
+  _id?: string;
   userId: string;
   title: string;
   shortDescription: string;
@@ -140,12 +153,12 @@ export interface MyPostsQueryParams {
 }
 export const postsAPI = {
   create: (
-    data: Omit<SavedPost, "_id" | "userId" | "createdAt" | "updatedAt">,
+    data: Omit<SavedPost, "id" | "_id" | "userId" | "createdAt" | "updatedAt">,
   ) =>
     apiCall<SavedPost>("/posts", {
       method: "POST",
       body: JSON.stringify(data),
-    }),
+    }).then(normalizeSavedPost),
   getMine: (params?: MyPostsQueryParams) => {
     const query = new URLSearchParams();
     if (params) {
@@ -161,9 +174,19 @@ export const postsAPI = {
     }
 
     const endpoint = `/posts/my${query.toString() ? `?${query.toString()}` : ""}`;
-    return apiCall<MyPostsResponse>(endpoint);
+    return apiCall<SavedPost[]>(endpoint).then((items) => ({
+      items: items.map(normalizeSavedPost),
+      total: items.length,
+      page: params?.page ?? 1,
+      pageSize: params?.pageSize ?? 4,
+      totalPages: Math.max(
+        1,
+        Math.ceil(items.length / (params?.pageSize ?? 4)),
+      ),
+    }));
   },
-  getById: (id: string) => apiCall<SavedPost>(`/posts/${id}`),
+  getById: (id: string) =>
+    apiCall<SavedPost>(`/posts/${id}`).then(normalizeSavedPost),
   delete: (id: string) =>
     apiCall<{ message: string }>(`/posts/${id}`, { method: "DELETE" }),
 };

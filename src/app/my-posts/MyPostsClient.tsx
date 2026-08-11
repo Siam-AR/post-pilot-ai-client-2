@@ -192,7 +192,7 @@ export default function MyPostsClient() {
       await postsAPI.delete(id);
       setPostsResponse((prev) => {
         if (!prev) return prev;
-        const items = prev.items.filter((p: SavedPost) => p._id !== id);
+        const items = prev.items.filter((p: SavedPost) => p.id !== id);
         const total = Math.max(0, prev.total - 1);
         const totalPages = Math.max(1, Math.ceil(total / prev.pageSize));
         return { ...prev, items, total, totalPages } as MyPostsResponse;
@@ -352,7 +352,7 @@ export default function MyPostsClient() {
             <div className="mt-8 grid gap-5 md:grid-cols-2">
               {items.map((post) => (
                 <article
-                  key={post._id}
+                  key={post.id}
                   className="rounded-3xl border border-white/10 bg-white/3 p-6 transition-transform hover:-translate-y-1"
                 >
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1423]">
@@ -403,16 +403,16 @@ export default function MyPostsClient() {
                       <button
                         type="button"
                         onClick={() => {
-                          setPendingDelete({ id: post._id, title: post.title });
+                          setPendingDelete({ id: post.id, title: post.title });
                           setShowDeleteModal(true);
                         }}
-                        disabled={deletingId === post._id}
+                        disabled={deletingId === post.id}
                         className="inline-flex rounded-xl border border-red-500/30 bg-red-600/10 px-4 py-3 font-semibold text-red-300 transition hover:bg-red-600/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {deletingId === post._id ? "Deleting..." : "Delete"}
+                        {deletingId === post.id ? "Deleting..." : "Delete"}
                       </button>
                       <Link
-                        href={`/my-posts/${post._id}`}
+                        href={`/my-posts/${post.id}`}
                         className="inline-flex rounded-xl bg-[#5067f5] px-4 py-3 font-semibold text-white transition hover:bg-[#4056d1]"
                       >
                         Open post

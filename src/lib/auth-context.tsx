@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "./api";
+import { authAPI, normalizeUser } from "./api";
 import type { AuthResponse, User } from "@/types";
 
 interface AuthContextValue {
@@ -33,9 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           setToken(savedToken);
           const response = await authAPI.getUser();
-          const userData =
-            (response as { user?: User })?.user || (response as User);
-          setUser(userData || null);
+          setUser(normalizeUserResponse(response));
         } catch {
           localStorage.removeItem("token");
           setToken(null);
@@ -51,10 +49,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const normalizeAuthResponse = (
     response: AuthResponse | { data?: AuthResponse },
   ): AuthResponse => {
-    if (response && typeof response === "object" && "data" in response) {
-      return response.data || (response as AuthResponse);
+    const authResponse =
+      response && typeof response === "object" && "data" in response
+        ? response.data || {}
+        : (response as AuthResponse);
+
+    if (!authResponse) {
+      return {} as AuthResponse;
     }
-    return response as AuthResponse;
+
+    return {
+      ...authResponse,
+      user: authResponse.user ? normalizeUser(authResponse.user) : undefined,
+    };
   };
 
   const normalizeUserResponse = (
@@ -63,7 +70,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!response) {
       return null;
     }
-    return (response as { user?: User }).user || (response as User);
+    const userData = (response as { user?: User }).user || (response as User);
+    if (!userData) {
+      return null;
+    }
+    return normalizeUser(userData);
   };
 
   const register = async (

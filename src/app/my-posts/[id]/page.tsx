@@ -68,7 +68,7 @@ export default function PostDetailsPage() {
       .then((response) => {
         if (!isMounted) return;
         setRelatedPosts(
-          response.items.filter((item) => item._id !== post._id).slice(0, 3),
+          response.items.filter((item) => item.id !== post.id).slice(0, 3),
         );
       })
       .catch(() => {
@@ -84,7 +84,7 @@ export default function PostDetailsPage() {
     if (!post) return;
 
     try {
-      await postsAPI.delete(post._id);
+      await postsAPI.delete(post.id);
       showToast("Post deleted successfully.", "success");
       router.push("/my-posts");
     } catch (error) {
@@ -96,13 +96,14 @@ export default function PostDetailsPage() {
   };
 
   const ownsPost = Boolean(
-    user && (user.id === post?.userId || user._id === post?.userId),
+    user && (user.id === post?.userId || user.id === post?.userId),
   );
-  const heroImage = post?.imageUrl &&
+  const heroImage =
+    post?.imageUrl &&
     (post.imageUrl.startsWith("http://") ||
       post.imageUrl.startsWith("https://"))
-    ? post.imageUrl
-    : null;
+      ? post.imageUrl
+      : null;
 
   if (loading) {
     return (
@@ -227,8 +228,8 @@ export default function PostDetailsPage() {
                 {relatedPosts.length > 0 ? (
                   relatedPosts.map((related) => (
                     <Link
-                      key={related._id}
-                      href={`/my-posts/${related._id}`}
+                      key={related.id}
+                      href={`/my-posts/${related.id}`}
                       className="block rounded-2xl border border-white/10 bg-[#0b1423]/70 p-4 transition hover:border-[#5067f5]/50"
                     >
                       <p className="font-semibold text-white">
