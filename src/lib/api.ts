@@ -103,7 +103,7 @@ export type GeneratePostInput = {
 };
 export const aiAPI = {
   generate: (data: GeneratePostInput) =>
-    apiCall<{ content: string }>("/api/ai/generate", {
+    apiCall<{ content: string }>("/ai/generate", {
       method: "POST",
       body: JSON.stringify(data),
     }),
@@ -142,7 +142,7 @@ export const postsAPI = {
   create: (
     data: Omit<SavedPost, "_id" | "userId" | "createdAt" | "updatedAt">,
   ) =>
-    apiCall<SavedPost>("/api/posts", {
+    apiCall<SavedPost>("/posts", {
       method: "POST",
       body: JSON.stringify(data),
     }),
@@ -160,10 +160,10 @@ export const postsAPI = {
       });
     }
 
-    const endpoint = `/api/posts/my${query.toString() ? `?${query.toString()}` : ""}`;
+    const endpoint = `/posts/my${query.toString() ? `?${query.toString()}` : ""}`;
     return apiCall<MyPostsResponse>(endpoint);
   },
-  getById: (id: string) => apiCall<SavedPost>(`/api/posts/${id}`),
+  getById: (id: string) => apiCall<SavedPost>(`/posts/${id}`),
   delete: (id: string) =>
-    apiCall<{ message: string }>(`/api/posts/${id}`, { method: "DELETE" }),
+    apiCall<{ message: string }>(`/posts/${id}`, { method: "DELETE" }),
 };
