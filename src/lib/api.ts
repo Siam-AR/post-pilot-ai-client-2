@@ -103,7 +103,7 @@ export type GeneratePostInput = {
 };
 export const aiAPI = {
   generate: (data: GeneratePostInput) =>
-    apiCall<{ content: string }>("/ai/generate", {
+    apiCall<{ generatedContent: string }>("/ai/generate", {
       method: "POST",
       body: JSON.stringify(data),
     }),

@@ -41,7 +41,8 @@ export default function GeneratePostPage() {
       return showToast("Please add a topic first.", "warning");
     setLoading(true);
     try {
-      setContent((await aiAPI.generate(form)).content);
+      const response = await aiAPI.generate(form);
+      setContent(response.generatedContent);
       setSaved(false);
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Generation failed.", "error");
