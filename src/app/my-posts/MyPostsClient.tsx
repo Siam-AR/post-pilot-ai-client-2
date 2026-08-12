@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { postsAPI, type MyPostsResponse, type SavedPost } from "@/lib/api";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@/lib/auth-context";
 import { buildLoginRedirectUrl } from "@/lib/auth-redirect";
+
+const getImageSource = (post: SavedPost) => {
+  const url = post.imageUrl || (post as any).image || "";
+  if (
+    typeof url === "string" &&
+    (url.startsWith("http://") || url.startsWith("https://"))
+  ) {
+    return url;
+  }
+  return "/post-default.svg";
+};
 
 const PLATFORM_OPTIONS = [
   "All",
@@ -58,6 +68,45 @@ const buildQueryString = (
   return query.toString();
 };
 
+const applyFiltersAndSort = (
+  items: SavedPost[],
+  search: string,
+  platform: string,
+  tone: string,
+  sort: string,
+) => {
+  const normalizedSearch = search.trim().toLowerCase();
+
+  const filtered = items.filter((post) => {
+    const title = post.title?.toString().toLowerCase() || "";
+    const content = post.generatedContent?.toString().toLowerCase() || "";
+    const matchesSearch =
+      !normalizedSearch ||
+      title.includes(normalizedSearch) ||
+      content.includes(normalizedSearch);
+    const matchesPlatform = platform === "All" || post.platform === platform;
+    const matchesTone = tone === "All" || post.tone === tone;
+    return matchesSearch && matchesPlatform && matchesTone;
+  });
+
+  return filtered.sort((a, b) => {
+    const createdA = new Date(a.createdAt).getTime();
+    const createdB = new Date(b.createdAt).getTime();
+    if (sort === "oldest") {
+      return createdA - createdB;
+    }
+    if (sort === "title") {
+      return a.title.localeCompare(b.title);
+    }
+    if (sort === "updated") {
+      const updatedA = new Date(a.updatedAt || a.createdAt).getTime();
+      const updatedB = new Date(b.updatedAt || b.createdAt).getTime();
+      return updatedB - updatedA;
+    }
+    return createdB - createdA;
+  });
+};
+
 export default function MyPostsClient() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -87,18 +136,6 @@ export default function MyPostsClient() {
     [searchParams],
   );
 
-  const queryParams = useMemo(
-    () => ({
-      search: query.search || undefined,
-      platform: query.platform !== "All" ? query.platform : undefined,
-      tone: query.tone !== "All" ? query.tone : undefined,
-      sort: query.sort,
-      page: query.page,
-      pageSize: query.pageSize,
-    }),
-    [query],
-  );
-
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.replace(buildLoginRedirectUrl(pathname));
@@ -112,7 +149,7 @@ export default function MyPostsClient() {
     const loadPosts = async () => {
       setIsLoadingPosts(true);
       try {
-        const data = await postsAPI.getMine(queryParams);
+        const data = await postsAPI.getMine({ pageSize: 1000 });
         if (isMounted) {
           setPostsResponse(data);
         }
@@ -146,13 +183,12 @@ export default function MyPostsClient() {
     };
   }, [
     isAuthenticated,
-    queryParams,
-    query.page,
-    query.pageSize,
     showToast,
     loading,
     pathname,
     router,
+    query.page,
+    query.pageSize,
   ]);
 
   const updateQuery = (
@@ -210,6 +246,30 @@ export default function MyPostsClient() {
 
   const availablePlatforms = PLATFORM_OPTIONS;
 
+  const filteredItems = useMemo(() => {
+    const items = postsResponse?.items ?? [];
+    return applyFiltersAndSort(
+      items,
+      query.search,
+      query.platform,
+      query.tone,
+      query.sort,
+    );
+  }, [
+    postsResponse?.items,
+    query.search,
+    query.platform,
+    query.tone,
+    query.sort,
+  ]);
+
+  const totalItems = filteredItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / query.pageSize));
+  const displayItems = filteredItems.slice(
+    (query.page - 1) * query.pageSize,
+    query.page * query.pageSize,
+  );
+
   if (loading) {
     return (
       <main className="min-h-screen bg-[#08111c] px-5 py-16 text-white sm:px-8">
@@ -231,10 +291,6 @@ export default function MyPostsClient() {
   if (!isAuthenticated) {
     return null;
   }
-
-  const items = postsResponse?.items ?? [];
-  const totalPages = postsResponse?.totalPages ?? 1;
-  const totalItems = postsResponse?.total ?? 0;
 
   return (
     <main className="min-h-screen bg-[#08111c] px-5 py-16 text-white sm:px-8">
@@ -334,7 +390,7 @@ export default function MyPostsClient() {
               </article>
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : displayItems.length === 0 ? (
           <div className="mt-10 rounded-3xl border border-white/10 bg-white/3 p-8 text-center sm:p-10">
             <h2 className="text-2xl font-bold">No matching posts found</h2>
             <p className="mt-3 text-slate-400">
@@ -350,33 +406,18 @@ export default function MyPostsClient() {
         ) : (
           <>
             <div className="mt-8 grid gap-5 md:grid-cols-2">
-              {items.map((post) => (
+              {displayItems.map((post) => (
                 <article
                   key={post.id}
                   className="rounded-3xl border border-white/10 bg-white/3 p-6 transition-transform hover:-translate-y-1"
                 >
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0b1423]">
-                    {post.imageUrl &&
-                    (post.imageUrl.startsWith("http://") ||
-                      post.imageUrl.startsWith("https://")) ? (
-                      <Image
-                        src={post.imageUrl}
-                        alt={post.title}
-                        width={1200}
-                        height={480}
-                        className="h-40 w-full object-cover"
-                      />
-                    ) : (
-                      <Image
-                        src="/post-default.svg"
-                        alt="Default"
-                        width={1200}
-                        height={480}
-                        className="h-40 w-full object-cover"
-                      />
-                    )}
+                    <img
+                      src={getImageSource(post)}
+                      alt={post.title || "Post preview"}
+                      className="h-40 w-full object-cover"
+                    />
                   </div>
-
                   <div className="mt-4 flex flex-wrap gap-2 text-sm">
                     <span className="rounded-full bg-[#5067f5]/20 px-3 py-1 text-[#b5bdff]">
                       {post.platform}
@@ -425,7 +466,7 @@ export default function MyPostsClient() {
 
             <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-slate-400">
-                Showing {items.length} of {totalItems} posts
+                Showing {displayItems.length} of {totalItems} posts
               </p>
               <div className="flex flex-wrap items-center gap-3 text-sm text-slate-300">
                 <span>
